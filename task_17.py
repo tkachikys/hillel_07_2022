@@ -17,6 +17,4 @@ with open("Hillel_07_2022/fiends_1.csv", mode="w", newline="", encoding="utf-8")
         file_writer.writerow(i)
 
 
-a =asfd
-
 
