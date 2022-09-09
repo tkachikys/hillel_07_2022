@@ -42,9 +42,9 @@ class Circle(Point):
         y = self.y - other.y
         radius = abs(self.radius - other.radius)
         if radius == 0:
-            print(f"Point{x},{y}")
+            return Point(x, y)
         else:
-            return f"Point {x},{y} radius: {radius}"
+            return Circle(radius, x, y)
 
 
     def __add__(self, other):
