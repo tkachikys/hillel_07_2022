@@ -30,3 +30,5 @@ while True:
     except ValueError:
         print("Ошибочнный ввод, введите число")
         continue
+
+        
