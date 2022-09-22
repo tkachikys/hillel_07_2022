@@ -5,68 +5,91 @@ from datetime import datetime, time, date
 
 class data_person(object):
         @staticmethod
-        def write():#Запись в хл файл
+        def write():
             r = sheet.max_row
             cell = sheet.cell(row=r + 1, column=1)
             cell.value = input("Введите имя: ")
             cell = sheet.cell(row=r + 1, column=2)
-            cell.value = input("Введите фамилию: ")# не обязательно
+            cell.value = input("Введите фамилию: ")
             cell = sheet.cell(row=r + 1, column=3)
-            cell.value = input("Введите отчество: ")# не обязательно
+            cell.value = input("Введите отчество: ")
             cell = sheet.cell(row=r + 1, column=4)
-            cell.value = input("Введите дату рождения(ДД-ММ-ГГ): ")
+            cell.value = input("Введите дату рождения(ГГ-ММ-ДД): ")
             cell = sheet.cell(row=r + 1, column=5)
-            cell.value = input("Введите дату смерти(ДД-ММ-ГГ): ")# не обязательно
+            cell.value = input("Введите дату смерти(ГГ-ММ-ДД): ")
             cell = sheet.cell(row=r + 1, column=6)
             cell.value = input("Введите пол(М/Ж): ")
             wb.save("Test.xlsx")
 
         @staticmethod
-        def load_data():#Загрузка файла в хл, не работает ДОДЕЛАЙ!
-            a = input("Введите назваие файла: ")
-            data_for_load = pd.read_excel(a,sheet_name="Sheet")
-            writer = pd.ExcelWriter("Test.xlsx")
-            data_for_load.to_excel(writer)
-            writer.save()
-            print("Напиши код загрузки файла")
+        def load_data():
+            try:
+                wb = openpyxl.Workbook()
+                wb.create_sheet(title="Sheet1", index=0)
+                wb.save("Test.xlsx")
+                file_name = input("Введите назваие файла: ")
+                data_for_load = pd.read_excel(file_name)
+                writer = pd.ExcelWriter("Test.xlsx",  engine='openpyxl')
+                data_for_load.to_excel(writer, index=False)
+                writer.save()
+                print("Данные внесены ")
+            except FileNotFoundError:
+                print(f"Файл `{file_name}` не найден")
 
         @staticmethod
-        def find_data():#Поиск в файле, работает, нужно сделать независимость от регистра.
+        def find_data():
             text = input("   Введите имя для поиска: ")
-            persons = pd.read_excel("Test.xlsx", sheet_name="Sheet")
+            persons = pd.read_excel("Test.xlsx", sheet_name="Sheet1")
             filter_person = persons["name"].str.contains(text)
             filter_person_1 = persons["surname"].str.contains(text)
             filter_person_2 = persons["second_name"].str.contains(text)
             print(persons.loc[filter_person | filter_person_1 | filter_person_2])
-            print("Нужно сделать не зависимость от регистра, обработать ошибки")
+
 
         @staticmethod
-        def person_age():#Вычисление возраста, работает, пока что только для живых людей
-            df = pd.DataFrame
+        def person_age():
             text = input("   Введите имя для поиска: ")
-            persons = pd.read_excel("Test.xlsx", sheet_name="Sheet")
+            today = date.today()
+            persons = pd.read_excel("Test.xlsx", sheet_name="Sheet1")
             filter_person = persons["name"].str.contains(text)
             filter_person_1 = persons["surname"].str.contains(text)
             filter_person_2 = persons["second_name"].str.contains(text)
             person_to_age = persons.loc[filter_person | filter_person_1 | filter_person_2]
-            birthday_person = person_to_age["birthday"]
-            birthday_person_str = birthday_person.to_string()
-            birthday_p_dt = datetime.strptime(birthday_person_str[-10:], "%d-%m-%Y")
-            age_person = datetime.now().year - birthday_p_dt.year
-            today = date.today()
+            name_person = person_to_age[["name", "surname", "second_name"]]
+
+            def age_die(age_die_person):
+                if dieday_p_dt.month < birthday_p_dt.month:
+                    age_die_person -= 1
+                elif dieday_p_dt.month == birthday_p_dt.month and dieday_p_dt.day < birthday_p_dt.day:
+                    age_die_person -= 1
+                return f"{name_person} прожил {age_die_person} лет/года"
 
             def age(age_person):
                 if today.month < birthday_p_dt.month:
                     age_person -= 1
                 elif today.month == birthday_p_dt.month and today.day < birthday_p_dt.day:
                     age_person -= 1
-                return age_person
-
-            print(age(age_person))
+                return f"{name_person} сейчас {age_person} лет/года"
+            try:
+                birthday_person = person_to_age["birthday"]
+                birthday_person_str = birthday_person.to_string()
+                birthday_p_dt = datetime.strptime(birthday_person_str[-10:], "%Y-%m-%d")
+                dieday_person = person_to_age["dieday"]
+                dieday_person_str = dieday_person.to_string()
+                dieday_p_dt = datetime.strptime(dieday_person_str[-10:], "%Y-%m-%d")
+                age_die_person = dieday_p_dt.year - birthday_p_dt.year
+                print(age_die(age_die_person))
+            except ValueError:
+                birthday_person = person_to_age["birthday"]
+                birthday_person_str = birthday_person.to_string()
+                birthday_p_dt = datetime.strptime(birthday_person_str[-10:], "%Y-%m-%d")
+                age_person = datetime.now().year - birthday_p_dt.year
+                print(age(age_person))
 
 
 wb = openpyxl.Workbook()
-sheet = wb["Sheet"]
+wb.create_sheet(title="Sheet1", index=0)
+sheet = wb["Sheet1"]
 name_colums = ["name", "surname", "second_name", "birthday", "dieday", "sex"]
 
 for i in range(0, 6):
